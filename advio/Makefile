@@ -15,6 +15,7 @@ MOREPROGS = rot13c2
 all:	$(PROGS) $(MOREPROGS) lockfile.o
 
 rot13c2.c:	rot13c2.c.in $(LIBAPUE)
+	sudo chmod 777 fixup.awk
 	./fixup.awk rot13a.c >xlate
 	sed '/same/q' rot13c2.c.in >rot13c2.c
 	cat xlate >>rot13c2.c
