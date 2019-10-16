@@ -42,15 +42,18 @@ main(void)
 	err = pthread_create(&tid1, NULL, thr_fn1, NULL);
 	if (err != 0)
 		err_exit(err, "can't create thread 1");
-	err = pthread_join(tid1, (void *)&fp);
+	err = pthread_join(tid1, (void *)&fp);	/* fp = &foo */
 	if (err != 0)
 		err_exit(err, "can't join with thread 1");
 	sleep(1);
+
 	printf("parent starting second thread\n");
 	err = pthread_create(&tid2, NULL, thr_fn2, NULL);
 	if (err != 0)
 		err_exit(err, "can't create thread 2");
 	sleep(1);
+	
 	printfoo("parent:\n", fp);
+
 	exit(0);
 }
