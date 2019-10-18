@@ -32,9 +32,10 @@ foo_alloc(int id) /* allocate the object */
 		idx = HASH(id);
 		pthread_mutex_lock(&hashlock);
 		fp->f_next = fh[idx];
-		fh[idx] = fp;
-		pthread_mutex_lock(&fp->f_lock);
-		pthread_mutex_unlock(&hashlock);
+		fh[idx] = fp;	/* 形成环状 */
+		pthread_mutex_lock(&fp->f_lock);	// a
+		pthread_mutex_unlock(&hashlock);	// b
+		// a & b 顺序正确, 加锁顺序已确定是先 hashlock 再 fp->f_lock, 如果这里先 b 后 a, 可能其他地方会率先按顺序得到二锁，导致这里效率低
 		/* ... continue initialization ... */
 		pthread_mutex_unlock(&fp->f_lock);
 	}
@@ -54,7 +55,7 @@ foo_find(int id) /* find an existing object */
 {
 	struct foo	*fp;
 
-	pthread_mutex_lock(&hashlock);
+	pthread_mutex_lock(&hashlock);	// 保护 fh[NHASH] & fp->f_next & 保证加锁顺序
 	for (fp = fh[HASH(id)]; fp != NULL; fp = fp->f_next) {
 		if (fp->f_id == id) {
 			foo_hold(fp);
@@ -73,9 +74,9 @@ foo_rele(struct foo *fp) /* release a reference to the object */
 
 	pthread_mutex_lock(&fp->f_lock);
 	if (fp->f_count == 1) { /* last reference */
-		pthread_mutex_unlock(&fp->f_lock);
-		pthread_mutex_lock(&hashlock);
-		pthread_mutex_lock(&fp->f_lock);
+		pthread_mutex_unlock(&fp->f_lock);	// 为了保证 c & d 顺序加锁
+		pthread_mutex_lock(&hashlock);	// c
+		pthread_mutex_lock(&fp->f_lock);	// d
 		/* need to recheck the condition */
 		if (fp->f_count != 1) {
 			fp->f_count--;
@@ -89,7 +90,7 @@ foo_rele(struct foo *fp) /* release a reference to the object */
 		if (tfp == fp) {
 			fh[idx] = fp->f_next;
 		} else {
-			while (tfp->f_next != fp)
+			while (tfp->f_next != fp)	// 如果 fp不在 list里，这里会死循环（在一个circle里寻找一个不存在的变量）
 				tfp = tfp->f_next;
 			tfp->f_next = fp->f_next;
 		}

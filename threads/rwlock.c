@@ -69,7 +69,7 @@ job_append(struct queue *qp, struct job *jp)
  * Remove the given job from a queue.
  */
 void
-job_remove(struct queue *qp, struct job *jp)
+job_remove(struct queue *qp, struct job *jp)	// 应该先判断 jp 是否在 qp 内
 {
 	pthread_rwlock_wrlock(&qp->q_lock);
 	if (jp == qp->q_head) {
@@ -99,7 +99,7 @@ job_find(struct queue *qp, pthread_t id)
 	if (pthread_rwlock_rdlock(&qp->q_lock) != 0)
 		return(NULL);
 
-	for (jp = qp->q_head; jp != NULL; jp = jp->j_next)
+	for (jp = qp->q_head; jp != NULL; jp = jp->j_next)	// 如果 qp 中没有线程 id的 job, jp = jp->j_next 最终使得 jp == NULL 而退出 for 
 		if (pthread_equal(jp->j_id, id))
 			break;
 
