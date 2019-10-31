@@ -5,15 +5,15 @@ static void	f1(int, int, int, int);
 static void	f2(void);
 
 static jmp_buf	jmpbuffer;
-static int		globval;
+static int		globval;	// 全局变量
 
 int
 main(void)
 {
-	int				autoval;
-	register int	regival;
-	volatile int	volaval;
-	static int		statval;
+	int				autoval;	// 自动变量
+	register int	regival;	// 寄存器变量
+	volatile int	volaval;	// 易失变量
+	static int		statval;	// 静态变量
 
 	globval = 1; autoval = 2; regival = 3; volaval = 4; statval = 5;
 
