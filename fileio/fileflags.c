@@ -7,7 +7,14 @@ main(int argc, char *argv[])
 	int		val;
 
 	if (argc != 2)
-		err_quit("usage: a.out <descriptor#>");
+		err_quit("usage: a.out <descriptor#>");	// 指定文件描述符；# 指定文件描述符应为数字
+
+	// ./fileflags 0 < /dev/tty , ok
+	// ./fileflags 0 </dev/tty , ok
+	// ./fileflags 0< /dev/tty , nok
+	printf("arg0: %s\n", argv[0]);	// ./fileflags
+	printf("arg1: %s\n", argv[1]);	// 0
+	printf("arg2: %s\n", argv[2]);	// (null)
 
 	if ((val = fcntl(atoi(argv[1]), F_GETFL, 0)) < 0)
 		err_sys("fcntl error for fd %d", atoi(argv[1]));

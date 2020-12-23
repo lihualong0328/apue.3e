@@ -113,7 +113,7 @@ dopath(Myfunc* func)
 		if ((ret = dopath(func)) != 0)		/* recursive */
 			break;	/* time to leave */
 	}
-	fullpath[n-1] = 0;	/* erase everything from slash onward */
+	fullpath[n-1] = 0;	/* erase everything from slash onward */	// 向前逐个擦除 / 
 
 	if (closedir(dp) < 0)
 		err_ret("can't close directory %s", fullpath);
